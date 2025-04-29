@@ -1,66 +1,92 @@
-# MCP Server Starter
+# BabelEdit Translation MCP Server
 
-A production-ready starter template for building Model Context Protocol (MCP) servers with TypeScript.
+A Model Context Protocol (MCP) server for updating translations in JSON files with BabelEdit.
 
-## 🚀 Quick Start
+## Overview
+
+This MCP server provides a single tool: `update-translation`. The tool allows you to update translations in JSON files for different languages. It's designed to work with nested translation structures where keys are separated by dots.
+
+## Features
+
+- Update translations in JSON files using a dot-notation path
+- Support for multiple language files
+- Preserves JSON structure and formatting
+- Handles nested translation keys
+- Graceful error handling
+
+## Tool: update-translation
+
+### Parameters
+
+- `translationId` - The translation ID using dot notation (e.g., "calendar.days.monday")
+- `language` - The language code for the translation file (e.g., "sv", "en", ...)
+- `path` - Path to the folder containing translation files
+- `translation` - The new translation value to be inserted
+
+### Example
+
+```json
+{
+  "translationId": "calendar.days.today",
+  "language": "en",
+  "path": "./translations",
+  "translation": "Today"
+}
+```
+
+## Setup and Usage
+
+### Prerequisites
+
+- Node.js 16+
+- Bun (for development)
+
+### Installation
 
 1. Clone the repository
 2. Install dependencies:
-   ```bash
-   bun install
-   ```
 
-## ✨ Key Features
+```bash
+bun install
+```
 
-- Bun for fast testing and development
-- Biome for linting and formatting
-- Automated version management with standard-version
-- Clean, maintainable project structure
+### Build
 
-## 📂 Project Structure
+```bash
+bun run build
+```
+
+### Run
+
+```bash
+bun start
+```
+
+## Development
+
+### Testing
+
+```bash
+bun test
+```
+
+## Project Structure
 
 ```
-mcp-starter/
+BabelEdit-MCP-server/
 ├── src/
-│   ├── tools/          # MCP tools implementation
-│   ├── utils/          # Shared utilities
-│   ├── main.ts         # Server entry point
-│   └── types.ts        # Shared type definitions
-├── tests/              # Test files
-├── biome.json          # Linting configuration
-├── tsconfig.json       # TypeScript configuration
-└── package.json        # Project dependencies
+│   ├── main.ts                         # Server entry point
+│   └── tools/
+│       └── updateTranslation/
+│           ├── index.ts                # Tool implementation
+│           └── schema.ts               # Tool schema
+├── tests/                              # Test files
+├── biome.json                          # Linting configuration
+├── tsconfig.json                       # TypeScript configuration
+└── package.json                        # Project dependencies
 ```
 
-## ⚙️ Configuration
-
-### Creating New Tools
-
-The project includes a script to help create new MCP tools:
-
-```bash
-bun run scripts/create-tool.ts <tool-name>
-```
-
-This will:
-1. Create a new tool directory under `src/tools/<tool-name>`
-2. Generate the basic tool structure including:
-   - index.ts (main implementation)
-   - schema.ts (JSON schema for tool parameters)
-   - test.ts (test file)
-3. Update the tools index file to export the new tool
-
-Example:
-```bash
-bun run scripts/create-tool.ts weather
-```
-
-## 🛠️ Development
-
-- **Run tests**: `bun test`
-- **Format code**: `bun run format`
-- **Lint code**: `bun run lint`
-- **Build project**: `bun run build`
+## Adding to Claude Desktop
 
 To add your development MCP server to Claude Desktop:
 
@@ -70,52 +96,16 @@ To add your development MCP server to Claude Desktop:
    ```
 2. Add to your Claude Desktop config:
    ```json
-   // You only need the argument if you need to pass arguments to your server
    {
      "mcpServers": {
-       "your-server-name": {
+       "babeledit": {
          "command": "node",
-         "args": ["/path/to/your/project/dist/main.js", "some_argument"]
+         "args": ["/path/to/your/project/dist/main.js"]
        }
      }
    }
    ```
 
-## 📜 Version Management
+## License
 
-This project uses [standard-version](https://github.com/conventional-changelog/standard-version) for automated version management. Run `bun run release` to create a new version.
-
-### Commit Message Format
-- `feat`: New feature (bumps minor version)
-- `fix`: Bug fix (bumps patch version)
-- `BREAKING CHANGE`: Breaking change (bumps major version)
-
-## 📦 Publishing to npm
-
-1. Ensure you're logged in to npm:
-   ```bash
-   npm login
-   ```
-2. Build the project:
-   ```bash
-   bun run build
-   ```
-3. Publish the package:
-   ```bash
-   npm publish
-   ```
-Remember to update the version number using `bun run release` before publishing new versions.
-
-## Installing from npm (after publishing)
-
-Add to your Claude Desktop config:
-```json
-// You only need the argument if you need to pass arguments to your server
-{
-  "mcpServers": {
-    "your-server-name": {
-      "command": "npx",
-      "args": ["-y", "your-package-name", "some_argument"]
-    }
-  }
-}
+MIT

@@ -3,81 +3,71 @@
 // Version is automatically updated during release process
 export const VERSION = "0.1.0";
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
-	CallToolRequestSchema,
-	ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
-import { createTools } from "./tools";
+  updateTranslationSchema,
+  type UpdateTranslationSchema,
+} from "./tools/updateTranslation/schema.js";
+import { updateTranslation } from "./tools/updateTranslation/index.js";
 
-
-/* You can remove this section if you don't need to validate command line arguments */
-/* You'll have to handle the error yourself */
-/*
-const expectedArgs = [
-	"expected-arg-1",
-	"expected-arg-2",
-]
-const args = process.argv.slice(2);
-if (args.length < expectedArgs.length) {
-	console.error("CLI arguments not provided. If you are getting this error and don't know why, you probably need to remove CLI argument logic in main.ts");
-	process.exit(1);
-}
-*/
+// Debug logging to stderr
+const debug = (message: string, ...args: any[]) => {
+  console.error(`[DEBUG] ${message}`, ...args);
+};
 
 // Initialize server
-const server = new Server(
-	{
-		name: "MCP SERVER NAME",
-		version: VERSION,
-	},
-	{
-		capabilities: {
-			tools: {},
-		},
-	},
-);
-
-const tools = createTools();
-
-// Register tools
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-	tools: tools.map(({ handler, ...tool }) => tool),
-}));
-
-// Register tool handlers
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-	try {
-		const { name, arguments: args } = request.params;
-		const tool = tools.find((t) => t.name === name);
-
-		if (!tool) {
-			throw new Error(`Unknown tool: ${name}`);
-		}
-
-		return tool.handler(args);
-	} catch (error) {
-		return {
-			content: [
-				{
-					type: "text",
-					text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-				},
-			],
-			isError: true,
-		};
-	}
+const server = new McpServer({
+  name: "BabelEdit Translation Update Server",
+  version: VERSION,
 });
+
+// Register the update-translation tool using the higher-level tool API
+server.tool(
+  "update-translation",
+  "Updates a translation in the specified language file",
+  updateTranslationSchema.shape,
+  async (args: UpdateTranslationSchema) => {
+    try {
+      debug("Tool handler called with:", JSON.stringify(args, null, 2));
+      const result = await updateTranslation(args);
+      debug("Function returned result:", result);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: result,
+          },
+        ],
+      };
+    } catch (error) {
+      debug("Error in update-translation tool:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
 
 // Start server
 async function runServer() {
-	const transport = new StdioServerTransport();
-	await server.connect(transport);
-	console.error("Todoist MCP Server running on stdio");
+  debug("Starting server...");
+  const transport = new StdioServerTransport();
+  debug("Connecting to transport...");
+  await server.connect(transport);
+  debug("BabelEdit Translation MCP Server running on stdio");
 }
 
 runServer().catch((error) => {
-	console.error("Fatal error running server:", error);
-	process.exit(1);
+  console.error("Fatal error running server:", error);
+  process.exit(1);
 });
