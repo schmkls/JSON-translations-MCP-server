@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
 // Version is automatically updated during release process
 export const VERSION = "0.1.0";
@@ -34,7 +34,7 @@ if (defaultTranslationsPath) {
 
 // Initialize server
 const server = new McpServer({
-  name: "BabelEdit Translation Update Server",
+  name: "JSON Translations MCP Server",
   version: VERSION,
 });
 

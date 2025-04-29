@@ -1,6 +1,6 @@
-# BabelEdit Translation MCP Server
+# JSON Translations MCP Server
 
-A Model Context Protocol (MCP) server for updating translations in JSON files with BabelEdit.
+A Model Context Protocol (MCP) server for updating translations in JSON files.
 
 ## Overview
 
@@ -38,33 +38,47 @@ This MCP server provides a single tool: `update-translation`. The tool allows yo
 
 ### Prerequisites
 
-- Bun
+- Node.js or Bun
 
 ### Installation
+
+#### From npm
+
+```bash
+npm install -g json-translations-mcp-server
+```
+
+#### From source
 
 1. Clone the repository
 2. Install dependencies:
 
 ```bash
 bun install
+# or
+npm install
 ```
 
 ### Build
 
 ```bash
 bun run build
+# or
+npm run build
 ```
 
 ### Run
 
 ```bash
-# Run without default path
-bun start
+# If installed from npm globally
+json-translations-mcp-server --path /path/to/translations
+# or
+json-translations-mcp-server -p /path/to/translations
 
-# Run with default translations path
+# If running from source
 bun start --path /path/to/translations
 # or
-bun start -p /path/to/translations
+npm run start -- --path /path/to/translations
 ```
 
 ## Development
@@ -78,7 +92,7 @@ bun test
 ## Project Structure
 
 ```
-BabelEdit-MCP-server/
+json-translations-mcp-server/
 ├── src/
 │   ├── main.ts                         # Server entry point
 │   └── tools/
@@ -93,7 +107,22 @@ BabelEdit-MCP-server/
 
 ## Adding to Claude Desktop
 
-To add your development MCP server to Claude Desktop:
+To add the MCP server to Claude Desktop:
+
+### If installed from npm
+
+```json
+{
+  "mcpServers": {
+    "json-translations-mcp-server": {
+      "command": "json-translations-mcp-server",
+      "args": ["--path", "/path/to/translations"]
+    }
+  }
+}
+```
+
+### If using from source
 
 1. Build the project:
    ```bash

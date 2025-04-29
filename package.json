@@ -1,5 +1,6 @@
 {
   "name": "json-translations-mcp-server",
+  "version": "0.1.0",
   "description": "A Model Context Protocol (MCP) server for updating translations in JSON files",
   "author": {
     "name": "Martin Mickels",
@@ -15,14 +16,14 @@
   "module": "main.ts",
   "type": "module",
   "bin": {
-    "json-translations-mcp-server": "dist/index.js"
+    "json-translations-mcp-server": "dist/main.js"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "prebuild": "bun scripts/prebuild.ts",
-    "build": "bun build ./src/main.ts --outdir dist --target bun && chmod +x dist/main.js",
+    "build": "bun build ./src/main.ts --outdir dist --target node && chmod +x dist/main.js",
     "start": "bun run dist/main.ts",
     "test": "bun test",
     "clean": "rm -rf dist",
