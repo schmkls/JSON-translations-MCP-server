@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import _ from "lodash";
 import zodToJsonSchema from "zod-to-json-schema";
 import { ToolSchema } from "@modelcontextprotocol/sdk/types.js";
@@ -7,9 +7,10 @@ import {
   updateTranslationSchema,
   type UpdateTranslationSchema,
 } from "./schema.js";
+import type { z } from "zod";
 
 // Convert Zod schema to JSON schema
-const makeJsonSchema = (schema: any) => {
+const makeJsonSchema = (schema: z.ZodType) => {
   const ToolInputSchema = ToolSchema.shape.inputSchema;
   return zodToJsonSchema(schema) as typeof ToolInputSchema._output;
 };
@@ -34,6 +35,13 @@ export const updateTranslation = async (
       translation,
     } = args;
 
+    // Check if path is provided
+    if (!translationPath) {
+      throw new Error(
+        "Translation path is required. Either specify it in the tool parameters or provide a default path when starting the server."
+      );
+    }
+
     // Construct the file path
     const filePath = path.join(translationPath, `${language}.json`);
     console.error("Looking for file:", filePath);
@@ -48,7 +56,7 @@ export const updateTranslation = async (
 
     // Read the JSON file
     const fileContent = fs.readFileSync(filePath, "utf-8");
-    let translationData;
+    let translationData: Record<string, unknown>;
 
     try {
       translationData = JSON.parse(fileContent);

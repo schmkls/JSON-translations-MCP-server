@@ -9,7 +9,10 @@ export const updateTranslationSchema = z.object({
   language: z
     .string()
     .describe("Language code for the translation file (e.g., 'sv', 'en')"),
-  path: z.string().describe("Path to the folder containing translation files"),
+  path: z
+    .string()
+    .describe("Path to the folder containing translation files")
+    .optional(),
   translation: z.string().describe("New translation value to be inserted"),
 });
 

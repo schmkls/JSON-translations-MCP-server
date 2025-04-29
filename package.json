@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "prebuild": "bun scripts/prebuild.ts",
-    "build": "bun build ./src/main.ts --outdir dist --target node && chmod +x dist/main.js",
+    "build": "bun build ./src/main.ts --outdir dist --target bun && chmod +x dist/main.js",
     "start": "bun run dist/main.ts",
     "test": "bun test",
     "clean": "rm -rf dist",

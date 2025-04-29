@@ -1,10 +1,29 @@
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import { updateTranslation } from "./index";
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
+
+// Define a type for our translations structure
+type TranslationData = {
+  calendar?: {
+    monday?: string;
+    tuesday?: string;
+    today?: string;
+  };
+  components?: {
+    "activate-partial-delivery-modal"?: {
+      title?: string;
+    };
+  };
+  resources?: {
+    "new-category"?: {
+      title?: string;
+    };
+  };
+};
 
 // Helper function to create test JSON file
-const createTestFile = (filePath: string, data: Record<string, any>) => {
+const createTestFile = (filePath: string, data: Record<string, unknown>) => {
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -13,9 +32,9 @@ const createTestFile = (filePath: string, data: Record<string, any>) => {
 };
 
 // Helper function to read test JSON file
-const readTestFile = (filePath: string): Record<string, any> => {
+const readTestFile = (filePath: string): TranslationData => {
   const content = fs.readFileSync(filePath, "utf-8");
-  return JSON.parse(content);
+  return JSON.parse(content) as TranslationData;
 };
 
 describe("updateTranslation", () => {
@@ -76,7 +95,7 @@ describe("updateTranslation", () => {
     expect(result).toContain("Successfully updated");
 
     const updatedContent = readTestFile(enFilePath);
-    expect(updatedContent.calendar.today).toBe("Right now");
+    expect(updatedContent.calendar?.today).toBe("Right now");
   });
 
   it("should update nested translation", async () => {
@@ -91,7 +110,7 @@ describe("updateTranslation", () => {
 
     const updatedContent = readTestFile(svFilePath);
     expect(
-      updatedContent.components["activate-partial-delivery-modal"].title
+      updatedContent.components?.["activate-partial-delivery-modal"]?.title
     ).toBe("Ny aktivering av delleveranser");
   });
 
@@ -106,7 +125,9 @@ describe("updateTranslation", () => {
     expect(result).toContain("Successfully updated");
 
     const updatedContent = readTestFile(enFilePath);
-    expect(updatedContent.resources["new-category"].title).toBe("New Category");
+    expect(updatedContent.resources?.["new-category"]?.title).toBe(
+      "New Category"
+    );
   });
 
   it("should throw error when file not found", async () => {

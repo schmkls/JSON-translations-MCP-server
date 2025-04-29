@@ -13,6 +13,7 @@ This MCP server provides a single tool: `update-translation`. The tool allows yo
 - Preserves JSON structure and formatting
 - Handles nested translation keys
 - Graceful error handling
+- Optional default translations path
 
 ## Tool: update-translation
 
@@ -20,7 +21,7 @@ This MCP server provides a single tool: `update-translation`. The tool allows yo
 
 - `translationId` - The translation ID using dot notation (e.g., "calendar.days.monday")
 - `language` - The language code for the translation file (e.g., "sv", "en", ...)
-- `path` - Path to the folder containing translation files
+- `path` - (Optional) Path to the folder containing translation files. If not provided, the default path set during server initialization will be used.
 - `translation` - The new translation value to be inserted
 
 ### Example
@@ -29,7 +30,6 @@ This MCP server provides a single tool: `update-translation`. The tool allows yo
 {
   "translationId": "calendar.days.today",
   "language": "en",
-  "path": "./translations",
   "translation": "Today"
 }
 ```
@@ -38,8 +38,7 @@ This MCP server provides a single tool: `update-translation`. The tool allows yo
 
 ### Prerequisites
 
-- Node.js 16+
-- Bun (for development)
+- Bun
 
 ### Installation
 
@@ -59,7 +58,13 @@ bun run build
 ### Run
 
 ```bash
+# Run without default path
 bun start
+
+# Run with default translations path
+bun start --path /path/to/translations
+# or
+bun start -p /path/to/translations
 ```
 
 ## Development
@@ -94,12 +99,29 @@ To add your development MCP server to Claude Desktop:
    ```bash
    bun run build
    ```
-2. Add to your Claude Desktop config:
+2. Add to your Claude Desktop config with default path:
+
    ```json
    {
      "mcpServers": {
-       "babeledit": {
-         "command": "node",
+       "json-translations-mcp-server": {
+         "command": "bun",
+         "args": [
+           "/path/to/your/project/dist/main.js",
+           "--path",
+           "/path/to/translations"
+         ]
+       }
+     }
+   }
+   ```
+
+3. Or without default path (will require path in each tool call):
+   ```json
+   {
+     "mcpServers": {
+       "json-translations-mcp-server": {
+         "command": "bun",
          "args": ["/path/to/your/project/dist/main.js"]
        }
      }

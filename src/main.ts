@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 // Version is automatically updated during release process
 export const VERSION = "0.1.0";
@@ -12,9 +12,25 @@ import {
 import { updateTranslation } from "./tools/updateTranslation/index.js";
 
 // Debug logging to stderr
-const debug = (message: string, ...args: any[]) => {
+const debug = (message: string, ...args: unknown[]) => {
   console.error(`[DEBUG] ${message}`, ...args);
 };
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+let defaultTranslationsPath: string | undefined = undefined;
+
+// Look for --path or -p argument
+for (let i = 0; i < args.length; i++) {
+  if ((args[i] === "--path" || args[i] === "-p") && i + 1 < args.length) {
+    defaultTranslationsPath = args[i + 1];
+    break;
+  }
+}
+
+if (defaultTranslationsPath) {
+  debug(`Using default translations path: ${defaultTranslationsPath}`);
+}
 
 // Initialize server
 const server = new McpServer({
@@ -30,6 +46,20 @@ server.tool(
   async (args: UpdateTranslationSchema) => {
     try {
       debug("Tool handler called with:", JSON.stringify(args, null, 2));
+
+      // Use default path if not provided in args
+      if (!args.path && defaultTranslationsPath) {
+        args.path = defaultTranslationsPath;
+        debug(`Using default path: ${defaultTranslationsPath}`);
+      }
+
+      // Check if path is still missing
+      if (!args.path) {
+        throw new Error(
+          "Translation path not provided. Either specify it in the tool parameters or provide a default path when starting the server."
+        );
+      }
+
       const result = await updateTranslation(args);
       debug("Function returned result:", result);
 
@@ -61,6 +91,13 @@ server.tool(
 // Start server
 async function runServer() {
   debug("Starting server...");
+  if (defaultTranslationsPath) {
+    debug(`Default translations path set to: ${defaultTranslationsPath}`);
+  } else {
+    debug(
+      "No default translations path provided. Path must be specified in each tool call."
+    );
+  }
   const transport = new StdioServerTransport();
   debug("Connecting to transport...");
   await server.connect(transport);
