@@ -2,6 +2,12 @@
   "name": "json-translations-mcp-server",
   "version": "0.1.0",
   "description": "A Model Context Protocol (MCP) server for updating translations in JSON files",
+  "keywords": [
+    "mcp",
+    "json",
+    "translations",
+    "BabelEdit"
+  ],
   "author": {
     "name": "Martin Mickels",
     "email": "martin.mickels.dev@gmail.com",
