@@ -10,6 +10,11 @@ import {
   type UpdateTranslationSchema,
 } from "./tools/updateTranslation/schema.js";
 import { updateTranslation } from "./tools/updateTranslation/index.js";
+import {
+  getTranslationSchema,
+  type GetTranslationSchema,
+} from "./tools/getTranslation/schema.js";
+import { getTranslation } from "./tools/getTranslation/index.js";
 
 // Debug logging to stderr
 const debug = (message: string, ...args: unknown[]) => {
@@ -32,21 +37,17 @@ if (defaultTranslationsPath) {
   debug(`Using default translations path: ${defaultTranslationsPath}`);
 }
 
-// Initialize server
 const server = new McpServer({
   name: "JSON Translations MCP Server",
   version: VERSION,
 });
 
-// Register the update-translation tool using the higher-level tool API
 server.tool(
   "update-translation",
   "Updates a translation in the specified language file",
   updateTranslationSchema.shape,
   async (args: UpdateTranslationSchema) => {
     try {
-      debug("Tool handler called with:", JSON.stringify(args, null, 2));
-
       // Use default path if not provided in args
       if (!args.path && defaultTranslationsPath) {
         args.path = defaultTranslationsPath;
@@ -61,7 +62,6 @@ server.tool(
       }
 
       const result = await updateTranslation(args);
-      debug("Function returned result:", result);
 
       return {
         content: [
@@ -88,6 +88,52 @@ server.tool(
   }
 );
 
+server.tool(
+  "get-translation",
+  "Gets a translation from the specified language file",
+  getTranslationSchema.shape,
+  async (args: GetTranslationSchema) => {
+    try {
+      // Use default path if not provided in args
+      if (!args.path && defaultTranslationsPath) {
+        args.path = defaultTranslationsPath;
+        debug(`Using default path: ${defaultTranslationsPath}`);
+      }
+
+      // Check if path is still missing
+      if (!args.path) {
+        throw new Error(
+          "Translation path not provided. Either specify it in the tool parameters or provide a default path when starting the server."
+        );
+      }
+
+      const result = await getTranslation(args);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: result,
+          },
+        ],
+      };
+    } catch (error) {
+      debug("Error in get-translation tool:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+);
+
 // Start server
 async function runServer() {
   debug("Starting server...");
@@ -99,9 +145,8 @@ async function runServer() {
     );
   }
   const transport = new StdioServerTransport();
-  debug("Connecting to transport...");
   await server.connect(transport);
-  debug("BabelEdit Translation MCP Server running on stdio");
+  debug("JSON Translations MCP Server running on stdio");
 }
 
 runServer().catch((error) => {

@@ -1,14 +1,15 @@
 # JSON Translations MCP Server
 
-A Model Context Protocol (MCP) server for updating translations in JSON files.
+A Model Context Protocol (MCP) server for updating and retrieving translations in JSON files.
 
 ## Overview
 
-This MCP server provides a single tool: `update-translation`. The tool allows you to update translations in JSON files for different languages. It's designed to work with nested translation structures where keys are separated by dots.
+This MCP server provides two tools: `update-translation` and `get-translation`. These tools allow you to update and retrieve translations in JSON files for different languages. It's designed to work with nested translation structures where keys are separated by dots.
 
 ## Features
 
 - Update translations in JSON files using a dot-notation path
+- Retrieve translations from JSON files using a dot-notation path
 - Support for multiple language files
 - Preserves JSON structure and formatting
 - Handles nested translation keys
@@ -19,7 +20,7 @@ This MCP server provides a single tool: `update-translation`. The tool allows yo
 
 ### Parameters
 
-- `translationId` - The translation ID using dot notation (e.g., "calendar.days.monday")
+- `translationId` - The translation ID using dot notation (e.g., "common.buttons.save")
 - `language` - The language code for the translation file (e.g., "sv", "en", ...)
 - `path` - (Optional) Path to the folder containing translation files. If not provided, the default path set during server initialization will be used.
 - `translation` - The new translation value to be inserted
@@ -28,9 +29,26 @@ This MCP server provides a single tool: `update-translation`. The tool allows yo
 
 ```json
 {
-  "translationId": "calendar.days.today",
+  "translationId": "common.buttons.save",
   "language": "en",
-  "translation": "Today"
+  "translation": "Save"
+}
+```
+
+## Tool: get-translation
+
+### Parameters
+
+- `translationId` - The translation ID using dot notation (e.g., "homepage.welcome.message")
+- `language` - The language code for the translation file (e.g., "sv", "en", ...)
+- `path` - (Optional) Path to the folder containing translation files. If not provided, the default path set during server initialization will be used.
+
+### Example
+
+```json
+{
+  "translationId": "homepage.welcome.message",
+  "language": "en"
 }
 ```
 
@@ -96,7 +114,10 @@ json-translations-mcp-server/
 ├── src/
 │   ├── main.ts                         # Server entry point
 │   └── tools/
-│       └── updateTranslation/
+│       ├── updateTranslation/
+│       │   ├── index.ts                # Tool implementation
+│       │   └── schema.ts               # Tool schema
+│       └── getTranslation/
 │           ├── index.ts                # Tool implementation
 │           └── schema.ts               # Tool schema
 ├── tests/                              # Test files

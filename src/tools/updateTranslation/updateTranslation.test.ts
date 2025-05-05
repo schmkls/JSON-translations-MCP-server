@@ -1,142 +1,80 @@
 import { describe, expect, it, beforeEach, afterEach } from "bun:test";
 import { updateTranslation } from "./index";
-import * as fs from "node:fs";
-import * as path from "node:path";
-
-// Define a type for our translations structure
-type TranslationData = {
-  calendar?: {
-    monday?: string;
-    tuesday?: string;
-    today?: string;
-  };
-  components?: {
-    "activate-partial-delivery-modal"?: {
-      title?: string;
-    };
-  };
-  resources?: {
-    "new-category"?: {
-      title?: string;
-    };
-  };
-};
-
-// Helper function to create test JSON file
-const createTestFile = (filePath: string, data: Record<string, unknown>) => {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(filePath, JSON.stringify(data, null, "\t"), "utf-8");
-};
-
-// Helper function to read test JSON file
-const readTestFile = (filePath: string): TranslationData => {
-  const content = fs.readFileSync(filePath, "utf-8");
-  return JSON.parse(content) as TranslationData;
-};
+import {
+  setupTestTranslations,
+  cleanupTestTranslations,
+  readTestFile,
+} from "../../lib/test/translationTestUtils";
 
 describe("updateTranslation", () => {
-  const testDir = path.join(process.cwd(), "test-translations");
-  const enFilePath = path.join(testDir, "en.json");
-  const svFilePath = path.join(testDir, "sv.json");
+  let testDir: string;
+  let enFilePath: string;
+  let svFilePath: string;
 
   beforeEach(() => {
-    // Create test directory and files
-    if (!fs.existsSync(testDir)) {
-      fs.mkdirSync(testDir, { recursive: true });
-    }
-
-    // Sample English translations
-    createTestFile(enFilePath, {
-      calendar: {
-        monday: "Monday",
-        tuesday: "Tuesday",
-        today: "Today",
-      },
-      components: {
-        "activate-partial-delivery-modal": {
-          title: "Activate partial deliveries",
-        },
-      },
-    });
-
-    // Sample Swedish translations
-    createTestFile(svFilePath, {
-      calendar: {
-        monday: "Måndag",
-        tuesday: "Tisdag",
-        today: "Idag",
-      },
-      components: {
-        "activate-partial-delivery-modal": {
-          title: "Aktivera delleveranser",
-        },
-      },
-    });
+    // Setup test translations
+    const setup = setupTestTranslations();
+    testDir = setup.testDir;
+    enFilePath = setup.enFilePath;
+    svFilePath = setup.svFilePath;
   });
 
   afterEach(() => {
     // Clean up test files
-    if (fs.existsSync(testDir)) {
-      fs.rmSync(testDir, { recursive: true, force: true });
-    }
+    cleanupTestTranslations(testDir);
   });
 
   it("should update existing translation", async () => {
     const result = await updateTranslation({
-      translationId: "calendar.today",
+      translationId: "common.buttons.save",
       language: "en",
       path: testDir,
-      translation: "Right now",
+      translation: "Save Changes",
     });
 
     expect(result).toContain("Successfully updated");
 
     const updatedContent = readTestFile(enFilePath);
-    expect(updatedContent.calendar?.today).toBe("Right now");
+    expect(updatedContent.common.buttons.save).toBe("Save Changes");
   });
 
   it("should update nested translation", async () => {
     const result = await updateTranslation({
-      translationId: "components.activate-partial-delivery-modal.title",
+      translationId: "homepage.welcome.message",
       language: "sv",
       path: testDir,
-      translation: "Ny aktivering av delleveranser",
+      translation: "Välkommen till vår nya applikation",
     });
 
     expect(result).toContain("Successfully updated");
 
     const updatedContent = readTestFile(svFilePath);
-    expect(
-      updatedContent.components?.["activate-partial-delivery-modal"]?.title
-    ).toBe("Ny aktivering av delleveranser");
+    expect(updatedContent.homepage.welcome.message).toBe(
+      "Välkommen till vår nya applikation"
+    );
   });
 
   it("should create missing parent objects", async () => {
     const result = await updateTranslation({
-      translationId: "resources.new-category.title",
+      translationId: "navigation.main-menu.home",
       language: "en",
       path: testDir,
-      translation: "New Category",
+      translation: "Home",
     });
 
     expect(result).toContain("Successfully updated");
 
     const updatedContent = readTestFile(enFilePath);
-    expect(updatedContent.resources?.["new-category"]?.title).toBe(
-      "New Category"
-    );
+    expect(updatedContent.navigation["main-menu"].home).toBe("Home");
   });
 
   it("should throw error when file not found", async () => {
     await expect(
       updateTranslation({
-        translationId: "calendar.today",
+        translationId: "common.buttons.save",
         language: "fr",
         path: testDir,
-        translation: "Aujourd'hui",
+        translation: "Sauvegarder",
       })
     ).rejects.toThrow("Translation file not found");
   });

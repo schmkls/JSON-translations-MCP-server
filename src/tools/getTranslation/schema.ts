@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-export const updateTranslationSchema = z.object({
+export const getTranslationSchema = z.object({
   translationId: z
     .string()
     .describe(
@@ -13,7 +13,6 @@ export const updateTranslationSchema = z.object({
     .string()
     .describe("Path to the folder containing translation files")
     .optional(),
-  translation: z.string().describe("New translation value to be inserted"),
 });
 
-export type UpdateTranslationSchema = z.infer<typeof updateTranslationSchema>;
+export type GetTranslationSchema = z.infer<typeof getTranslationSchema>;
