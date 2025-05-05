@@ -1,6 +1,6 @@
 {
   "name": "json-translations-mcp-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Model Context Protocol (MCP) server for updating translations in JSON files",
   "keywords": [
     "mcp",
